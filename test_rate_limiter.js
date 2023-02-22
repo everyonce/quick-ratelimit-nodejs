@@ -8,19 +8,9 @@ const logger = createLogger({
       format.timestamp({
         format: 'YYYY-MM-DD HH:mm:ss'
       }),
-      //
-      // The simple format outputs
-      // `${level}: ${message} ${[Object with everything else]}`
-      //
       format.cli(),
       format.colorize(),
-      //
-      // Alternatively you could use this custom printf format if you
-      // want to control where the timestamp comes in your final message.
-      // Try replacing `format.simple()` above with this:
-      //
       format.printf(info => `${info.timestamp} ${info.level}: ${info.message}`),
-      
     ),
     transports: [
       new transports.Console()
@@ -36,8 +26,13 @@ const main = async () =>  {
 
             .then(response => {
              logger.info(`API returned: ${response.status}`);
-            })        .catch(err => {
-              logger.info(`error: ${err}`);
+            })        
+            .catch(err => {
+              if (err.response.status=="429") {
+                logger.info("Request rate limited (429)");
+              } else {
+                logger.info(`error: ${Object.keys(err.response)}`);
+              }
             })
         await new Promise(resolve => setTimeout(resolve, 100));
     }
